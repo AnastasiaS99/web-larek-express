@@ -6,10 +6,10 @@ import jwt from 'jsonwebtoken';
 import ms from 'ms';
 import { Error as MongooseError } from 'mongoose';
 import User from '../models/user';
-import BadRequestError from '../errors/bad-request-error';
-import ConflictError from '../errors/conflict-error';
-import NotFoundError from '../errors/not-found-error';
-import UnauthorizedError from '../errors/unauthorized-error';
+import { BadRequestError } from '../errors/bad-request-error';
+import { ConflictError } from '../errors/conflict-error';
+import { NotFoundError } from '../errors/not-found-error';
+import { UnauthorizedError } from '../errors/unauthorized-error';
 import {
   AUTH_ACCESS_TOKEN_SECRET,
   AUTH_REFRESH_TOKEN_SECRET,

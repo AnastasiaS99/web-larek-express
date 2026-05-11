@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { faker } from '@faker-js/faker';
 import Product from '../models/product';
-import BadRequestError from '../errors/bad-request-error';
+import { BadRequestError } from '../errors/bad-request-error';
 
 // Интерфейс заказа
 type CreateOrderInfo = {
@@ -9,8 +9,8 @@ type CreateOrderInfo = {
   email: string;
   phone: string;
   address: string;
-  total: number | string;  
-  items: string[];         
+  total: number | string;
+  items: string[];
 };
 
 const createOrder: RequestHandler = async (req, res, next) => {

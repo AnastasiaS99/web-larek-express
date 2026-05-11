@@ -74,5 +74,5 @@ export const errorLogger = expressWinston.errorLogger({
   meta: true,
 });
 
-// Общий логгер (если нужно использовать вне express)
+// Общий логгер
 export const logger = winston.createLogger(getLoggerOptions('debug'));
