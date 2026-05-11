@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document } from 'mongoose';
 
 // Интерфейс картинки
 export interface IImage {
@@ -6,7 +6,7 @@ export interface IImage {
   originalName: string;
 }
 
-//Интерфейс продукта
+// Интерфейс продукта
 export interface IProduct extends Document {
   title: string;
   image: IImage;
@@ -17,13 +17,13 @@ export interface IProduct extends Document {
 
 // Константы для категорий
 const categories = [
-  "софт-скил",
-  "хард-скил",
-  "кнопка",
-  "дополнительное",
-  "другое",
+  'софт-скил',
+  'хард-скил',
+  'кнопка',
+  'дополнительное',
+  'другое',
 ] as const;
-type CategoryType = (typeof categories)[number];
+// type CategoryType = (typeof categories)[number];
 
 const imageSchema = new Schema<IImage>({
   fileName: {
@@ -54,17 +54,17 @@ const productSchema = new Schema<IProduct>(
       required: [true, 'Поле "category" обязательно для заполнения'],
       enum: {
         values: categories,
-        message: "Недопустимая категория",
+        message: 'Недопустимая категория',
       },
     },
     description: {
       type: String,
-      maxlength: [1000, "Максимальная длина описания - 1000 символов"],
+      maxlength: [1000, 'Максимальная длина описания - 1000 символов'],
     },
     price: {
       type: Number,
       default: null,
-      min: [0, "Цена не может быть <0"],
+      min: [0, 'Цена не может быть <0'],
     },
   },
   {
@@ -73,6 +73,6 @@ const productSchema = new Schema<IProduct>(
   },
 );
 
-const ProductModel = mongoose.model<IProduct>("product", productSchema);
+const ProductModel = mongoose.model<IProduct>('product', productSchema);
 
 export default ProductModel;

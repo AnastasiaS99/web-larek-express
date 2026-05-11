@@ -1,65 +1,78 @@
-import path from "path";
-import winston from "winston";
-import "winston-daily-rotate-file"; // Для ротации логов
-import expressWinston from "express-winston";
+import path from 'path';
+import winston from 'winston';
+import 'winston-daily-rotate-file'; // Для ротации логов
+import expressWinston from 'express-winston';
 
-const logDir = path.join(process.cwd(), "logs");
+const logDir = path.join(process.cwd(), 'logs');
 
 // Общий формат логирования
 const logFormat = winston.format.combine(
-  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-  winston.format.printf(({ timestamp, level, message, meta }) => {
-    const metaString =
-      meta && Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : "";
+  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+  winston.format.printf((
+    {
+      timestamp,
+      level,
+      message,
+      meta,
+    },
+  ) => {
+    const metaString = meta && Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
     return `${timestamp} [${level}]: ${message}${metaString}`;
   }),
 );
 
 // Конфигурация для транспорта
-const createTransport = (filename: string, level: string = "info") =>
-  new winston.transports.DailyRotateFile({
-    filename: path.join(logDir, filename),
-    datePattern: "YYYY-MM-DD",
-    zippedArchive: true,
-    maxSize: "20m",
-    maxFiles: "14d",
-    level,
-  });
+const createTransport = (
+  filename: string,
+  transportLevel: string = 'info',
+) => new winston.transports.DailyRotateFile({
+  filename: path.join(logDir, filename),
+  datePattern: 'YYYY-MM-DD',
+  zippedArchive: true,
+  maxSize: '20m',
+  maxFiles: '14d',
+  level: transportLevel,
+});
 
 // Консольный транспорт для разработки
-const createConsoleTransport = (level: string = "debug") =>
-  new winston.transports.Console({
-    level,
-    format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.printf(({ timestamp, level, message, meta }) => {
-        const metaString =
-          meta && Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : "";
-        return `${timestamp} [${level}]: ${message}${metaString}`;
-      }),
-    ),
-  });
+const createConsoleTransport = (
+  transportLevel: string = 'debug',
+) => new winston.transports.Console({
+  level: transportLevel,
+  format: winston.format.combine(
+    winston.format.colorize(),
+    winston.format.printf((
+      {
+        timestamp, level, message, meta,
+      },
+    ) => {
+      const metaString = meta && Object.keys(meta)
+        .length ? ` ${JSON.stringify(meta)}` : '';
+      return `${timestamp} [${level}]: ${message}${metaString}`;
+    }),
+  ),
+});
 
-// Общая настройка логгера
-const getLoggerOptions = (level: string = "info") => ({
+// Общие настройки логгера
+const getLoggerOptions = (logLevel: string = 'info') => ({
   format: logFormat,
   transports: [
-    createTransport("combined-%DATE%.log", level),
-    createConsoleTransport(level),
+    createTransport('combined-%DATE%.log', logLevel),
+    createConsoleTransport(logLevel),
   ],
   exceptionHandlers: [
-    createTransport("exceptions-%DATE%.log", "error"),
-    createConsoleTransport("error"),
+    createTransport('exceptions-%DATE%.log', 'error'),
+    createConsoleTransport('error'),
   ],
-  level,
+  level: logLevel,
 });
 
 // Request лог
 export const requestLogger = expressWinston.logger({
-  ...getLoggerOptions("info"),
+  ...getLoggerOptions('info'),
   transports: [
-    createTransport("request-%DATE%.log"),
-    createConsoleTransport("info"),
+    createTransport('request-%DATE%.log', 'info'),
+    createConsoleTransport('info'),
   ],
   meta: true,
   expressFormat: true,
@@ -68,13 +81,13 @@ export const requestLogger = expressWinston.logger({
 
 // Error лог
 export const errorLogger = expressWinston.errorLogger({
-  ...getLoggerOptions("error"),
+  ...getLoggerOptions('error'),
   transports: [
-    createTransport("error-%DATE%.log"),
-    createConsoleTransport("error"),
+    createTransport('error-%DATE%.log', 'error'),
+    createConsoleTransport('error'),
   ],
   meta: true,
 });
 
 // Общий логгер
-export const logger = winston.createLogger(getLoggerOptions("debug"));
+export const logger = winston.createLogger(getLoggerOptions('debug'));

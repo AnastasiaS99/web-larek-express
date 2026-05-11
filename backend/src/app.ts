@@ -1,19 +1,18 @@
-import express, { Request, Response, NextFunction } from "express";
-import cors from "cors";
-import mongoose from "mongoose";
-import path from "path";
-import cookieParser from "cookie-parser";
-import { requestLogger, errorLogger } from "./middlewares/logger";
-import errorHandler from "./middlewares/errorHandler";
-import { PORT, DB_ADDRESS } from "./config";
-import NotFoundError from "./errors/not-found-error";
-import rateLimit from "express-rate-limit";
-import { errors } from "celebrate";
-import productRouter from "./routes/productRoute";
-import orderRouter from "./routes/orderRoute";
-import authRouter from "./routes/authRoute";
-import uploadRouter from "./routes/uploadRoute";
-import { ORIGIN_ALLOW } from "./config";
+import express, { Request, Response, NextFunction } from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
+import path from 'path';
+import cookieParser from 'cookie-parser';
+import rateLimit from 'express-rate-limit';
+import { errors } from 'celebrate';
+import { requestLogger, errorLogger } from './middlewares/logger';
+import errorHandler from './middlewares/errorHandler';
+import { PORT, DB_ADDRESS, ORIGIN_ALLOW } from './config';
+import { NotFoundError } from './errors/not-found-error';
+import productRouter from './routes/productRoute';
+import orderRouter from './routes/orderRoute';
+import authRouter from './routes/authRoute';
+import uploadRouter from './routes/uploadRoute';
 
 const app = express();
 
@@ -45,17 +44,17 @@ app.use(limiter);
 app.use(requestLogger);
 
 // Раздача статических файлов из папки public/images по адресу /images
-app.use("/images", express.static(path.join(__dirname, "public/images")));
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
 // Подключение роутеров
-app.use("/auth", authRouter);
-app.use("/product", productRouter);
-app.use("/order", orderRouter);
-app.use("/upload", uploadRouter);
+app.use('/auth', authRouter);
+app.use('/product', productRouter);
+app.use('/order', orderRouter);
+app.use('/upload', uploadRouter);
 
 // В случае ошибки
 app.use((_req: Request, _res: Response, next: NextFunction) => {
-  next(new NotFoundError("Маршрут не найден"));
+  next(new NotFoundError('Маршрут не найден'));
 });
 
 // Логирование всех ошибок
@@ -71,13 +70,13 @@ mongoose
   .connect(DB_ADDRESS)
   .then(() => {
     // Если подключение успешно — запуск сервера на указанном порту
-    console.log("Удалось подключиться к MongoDB");
+    console.log('Удалось подключиться к MongoDB');
     app.listen(PORT, () => {
       console.log(`Сервер запущен по адресу http://localhost:${PORT}`);
     });
   })
   .catch((error) => {
     // Если не удалось подключиться к Mongo — ошибка и завершение процесса
-    console.error("Не удалось подключиться к MongoDB:", error);
+    console.error('Не удалось подключиться к MongoDB:', error);
     process.exit(1);
   });

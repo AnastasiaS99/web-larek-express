@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document, Schema } from 'mongoose';
 
 // Интерфейс для токена пользователя
 export interface IUserToken {
@@ -31,7 +31,7 @@ const userSchema = new Schema<IUser>(
       type: String,
       minlength: [2, 'Минимальная длина поля "name" - 2'],
       maxlength: [30, 'Максимальная длина поля "name" - 30'],
-      default: "Ё-мое",
+      default: 'Ё-мое',
     },
     email: {
       type: String,
@@ -57,5 +57,5 @@ const userSchema = new Schema<IUser>(
 );
 
 // Экспорт модели
-const UserModel = mongoose.model<IUser>("User", userSchema);
+const UserModel = mongoose.model<IUser>('User', userSchema);
 export default UserModel;

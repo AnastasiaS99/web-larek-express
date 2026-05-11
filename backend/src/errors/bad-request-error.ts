@@ -4,7 +4,7 @@ export class BadRequestError extends Error {
   public statusCode: number;
 
   // Конструктор класса, принимает опциональное сообщение об ошибке
-  constructor(message = "Bad request") {
+  constructor(message = 'Bad request') {
     // Вызов конструктора родительского класса Error с переданным сообщением
     super(message);
     // Установка свойства statusCode в значение 400

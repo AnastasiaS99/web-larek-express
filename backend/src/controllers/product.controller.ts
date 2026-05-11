@@ -1,23 +1,23 @@
-import { Request, Response, NextFunction } from "express";
-import { Error as MongooseError } from "mongoose";
-import path from "path";
-import fs from "fs/promises";
-import Product from "../models/product";
-import { BadRequestError } from "../errors/bad-request-error";
-import { ConflictError } from "../errors/conflict-error";
-import { NotFoundError } from "../errors/not-found-error";
-import { UPLOAD_PATH, UPLOAD_PATH_TEMP } from "../config";
+import { Request, Response, NextFunction } from 'express';
+import { Error as MongooseError } from 'mongoose';
+import path from 'path';
+import fs from 'fs/promises';
+import Product from '../models/product';
+import { BadRequestError } from '../errors/bad-request-error';
+import { ConflictError } from '../errors/conflict-error';
+import { NotFoundError } from '../errors/not-found-error';
+import { UPLOAD_PATH, UPLOAD_PATH_TEMP } from '../config';
 
 // Помещение файла из временной папки
 const moveFromTemp = async (fileName: string) => {
   const filename = path.basename(fileName);
   const tempPath = path.join(
     __dirname,
-    "../public",
+    '../public',
     UPLOAD_PATH_TEMP,
     filename,
   );
-  const finalPath = path.join(__dirname, "../public", UPLOAD_PATH, filename);
+  const finalPath = path.join(__dirname, '../public', UPLOAD_PATH, filename);
 
   try {
     // Проверка существование файла и перемещение
@@ -26,7 +26,7 @@ const moveFromTemp = async (fileName: string) => {
   } catch (err) {
     // В случае ошибки
     console.error(`Ошибка перемещения файла: ${err}`);
-    throw new BadRequestError("Файл не найден или его перемещение невозможно");
+    throw new BadRequestError('Файл не найден или его перемещение невозможно');
   }
 };
 
@@ -51,7 +51,13 @@ export const createProduct = async (
   next: NextFunction,
 ) => {
   try {
-    const { title, image, category, description, price } = req.body;
+    const {
+      title,
+      image,
+      category,
+      description,
+      price,
+    } = req.body;
 
     // Обработка изображения
     if (image?.fileName) {
@@ -70,8 +76,8 @@ export const createProduct = async (
     if (error instanceof MongooseError.ValidationError) {
       return next(new BadRequestError(error.message));
     }
-    if (error instanceof Error && error.message.includes("E11000")) {
-      return next(new ConflictError("Товар с таким названием уже существует"));
+    if (error instanceof Error && error.message.includes('E11000')) {
+      return next(new ConflictError('Товар с таким названием уже существует'));
     }
     return next(error);
   }
@@ -85,7 +91,13 @@ export const updateProduct = async (
 ) => {
   try {
     const { productId } = req.params;
-    const { title, image, category, description, price } = req.body;
+    const {
+      title,
+      image,
+      category,
+      description,
+      price,
+    } = req.body;
 
     const updates: any = {};
 
@@ -106,15 +118,15 @@ export const updateProduct = async (
       runValidators: true,
     });
     if (!product) {
-      return next(new NotFoundError("Товар не найден"));
+      return next(new NotFoundError('Товар не найден'));
     }
     return res.json(product);
   } catch (error) {
     if (error instanceof MongooseError.ValidationError) {
       return next(new BadRequestError(error.message));
     }
-    if (error instanceof Error && error.message.includes("E11000")) {
-      return next(new ConflictError("Товар с таким названием уже существует"));
+    if (error instanceof Error && error.message.includes('E11000')) {
+      return next(new ConflictError('Товар с таким названием уже существует'));
     }
     return next(error);
   }
@@ -130,7 +142,7 @@ export const deleteProduct = async (
     const { productId } = req.params;
     const product = await Product.findByIdAndDelete(productId);
     if (!product) {
-      return next(new NotFoundError("Товар не найден"));
+      return next(new NotFoundError('Товар не найден'));
     }
 
     return res.json(product);

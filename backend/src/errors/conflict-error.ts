@@ -4,7 +4,7 @@ export class ConflictError extends Error {
   public statusCode: number;
 
   // Конструктор класса: принимает сообщение об ошибке (по умолчанию 'Conflict')
-  constructor(message = "Conflict") {
+  constructor(message = 'Conflict') {
     // Передаём сообщение в конструктор родительского класса Error
     super(message);
     // Устанавливаем HTTP-статус 409 (Conflict)

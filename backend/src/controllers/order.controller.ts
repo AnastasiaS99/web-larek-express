@@ -1,11 +1,11 @@
-import { RequestHandler } from "express";
-import { faker } from "@faker-js/faker";
-import Product from "../models/product";
-import { BadRequestError } from "../errors/bad-request-error";
+import { RequestHandler } from 'express';
+import { faker } from '@faker-js/faker';
+import Product from '../models/product';
+import { BadRequestError } from '../errors/bad-request-error';
 
 // Интерфейс заказа
 type CreateOrderInfo = {
-  payment: "card" | "online" | "cash";
+  payment: 'card' | 'online' | 'cash';
   email: string;
   phone: string;
   address: string;
@@ -17,13 +17,11 @@ const createOrder: RequestHandler = async (req, res, next) => {
   try {
     const body = req.body as CreateOrderInfo;
     const { items } = body;
-
     // Обработка total
-    const totalNum =
-      typeof body.total === "string" ? Number(body.total) : body.total;
+    const totalNum = typeof body.total === 'string' ? Number(body.total) : body.total;
 
     if (!Number.isFinite(totalNum)) {
-      throw new BadRequestError("Неверное значение общей суммы");
+      throw new BadRequestError('Неверное значение общей суммы');
     }
 
     // Работа с ненужными дулями
@@ -33,7 +31,7 @@ const createOrder: RequestHandler = async (req, res, next) => {
     const products = await Product.find({ _id: { $in: uniqueItemIds } }).lean();
 
     if (products.length !== uniqueItemIds.length) {
-      throw new BadRequestError("Некоторые товары не найдены");
+      throw new BadRequestError('Некоторые товары не найдены');
     }
 
     // Создание карты цен
@@ -53,7 +51,7 @@ const createOrder: RequestHandler = async (req, res, next) => {
 
     // Проверка суммы
     if (calculatedSum !== totalNum) {
-      throw new BadRequestError("Сумма не совпадает с общей суммой товаров");
+      throw new BadRequestError('Сумма не совпадает с общей суммой товаров');
     }
 
     // Создание заказа

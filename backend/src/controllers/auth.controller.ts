@@ -1,19 +1,24 @@
-import { Request, Response, NextFunction, CookieOptions } from "express";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import ms from "ms";
-import { Error as MongooseError } from "mongoose";
-import User from "../models/user";
-import { BadRequestError } from "../errors/bad-request-error";
-import { ConflictError } from "../errors/conflict-error";
-import { NotFoundError } from "../errors/not-found-error";
-import { UnauthorizedError } from "../errors/unauthorized-error";
+import {
+  Request,
+  Response,
+  NextFunction,
+  CookieOptions,
+} from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import ms from 'ms';
+import { Error as MongooseError } from 'mongoose';
+import User from '../models/user';
+import { BadRequestError } from '../errors/bad-request-error';
+import { ConflictError } from '../errors/conflict-error';
+import { NotFoundError } from '../errors/not-found-error';
+import { UnauthorizedError } from '../errors/unauthorized-error';
 import {
   AUTH_ACCESS_TOKEN_SECRET,
   AUTH_REFRESH_TOKEN_SECRET,
   AUTH_ACCESS_TOKEN_EXPIRY,
   AUTH_REFRESH_TOKEN_EXPIRY,
-} from "../config";
+} from '../config';
 
 const ACCESS_SECRET = AUTH_ACCESS_TOKEN_SECRET;
 const REFRESH_SECRET = AUTH_REFRESH_TOKEN_SECRET;
@@ -22,10 +27,10 @@ const REFRESH_EXPIRY = AUTH_REFRESH_TOKEN_EXPIRY as ms.StringValue;
 
 const REFRESH_COOKIE_OPTIONS: CookieOptions = {
   httpOnly: true,
-  sameSite: "lax",
-  secure: process.env.NODE_ENV === "production", // В проде безопаснее true
+  sameSite: 'lax',
+  secure: process.env.NODE_ENV === 'production', // В проде безопаснее true
   maxAge: ms(REFRESH_EXPIRY),
-  path: "/",
+  path: '/',
 };
 
 // Создаем новые access и refresh токены
@@ -40,11 +45,11 @@ const generateTokens = (_id: string) => ({
 const getUserByRefreshToken = async (refreshToken: string) => {
   try {
     const payload = jwt.verify(refreshToken, REFRESH_SECRET) as { _id: string };
-    const user = await User.findById(payload._id).select("+tokens");
-    if (!user) throw new NotFoundError("Пользователь не найден");
+    const user = await User.findById(payload._id).select('+tokens');
+    if (!user) throw new NotFoundError('Пользователь не найден');
     return { user, payload };
   } catch {
-    throw new UnauthorizedError("Невалидный токен");
+    throw new UnauthorizedError('Невалидный токен');
   }
 };
 
@@ -58,7 +63,7 @@ export const register = async (
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
-      return next(new BadRequestError("Все поля обязательны"));
+      return next(new BadRequestError('Все поля обязательны'));
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -67,7 +72,7 @@ export const register = async (
     user.tokens.push({ token: refreshToken });
     await user.save();
 
-    res.cookie("refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS);
+    res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
     return res.status(201).send({
       user: { email: user.email, name: user.name },
       success: true,
@@ -77,9 +82,9 @@ export const register = async (
     if (error instanceof MongooseError.ValidationError) {
       return next(new BadRequestError(error.message));
     }
-    if (error instanceof Error && error.message.includes("E11000")) {
+    if (error instanceof Error && error.message.includes('E11000')) {
       return next(
-        new ConflictError("Пользователь с таким email уже существует"),
+        new ConflictError('Пользователь с таким email уже существует'),
       );
     }
     return next(error);
@@ -96,23 +101,21 @@ export const login = async (
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return next(new BadRequestError("Все поля обязательны"));
+      return next(new BadRequestError('Все поля обязательны'));
     }
 
-    const user = await User.findOne({ email }).select("+password +tokens");
+    const user = await User.findOne({ email }).select('+password +tokens');
 
-    if (!user) return next(new UnauthorizedError("Неверный email или пароль"));
+    if (!user) return next(new UnauthorizedError('Неверный email или пароль'));
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
-      return next(new UnauthorizedError("Неверный email или пароль"));
-
+    if (!isMatch) return next(new UnauthorizedError('Неверный email или пароль'));
     const { accessToken, refreshToken } = generateTokens(String(user._id));
     user.tokens.push({ token: refreshToken });
     if (user.tokens.length > 10) user.tokens = user.tokens.slice(-10);
     await user.save();
 
-    res.cookie("refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS);
+    res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
     return res.send({
       user: { email: user.email, name: user.name },
       success: true,
@@ -132,7 +135,7 @@ export const logout = async (
   try {
     const { refreshToken } = req.cookies;
     if (!refreshToken) {
-      return next(new UnauthorizedError("Токен не передан"));
+      return next(new UnauthorizedError('Токен не передан'));
     }
 
     const { user } = await getUserByRefreshToken(refreshToken);
@@ -140,13 +143,12 @@ export const logout = async (
     user.tokens = user.tokens.filter((t) => t.token !== refreshToken);
     await user.save();
 
-    res.clearCookie("refreshToken", { path: "/" });
+    res.clearCookie('refreshToken', { path: '/' });
     return res.send({ success: true });
   } catch (error) {
     return next(error);
   }
 };
-
 // Обновление access токена
 export const refreshAccessToken = async (
   req: Request,
@@ -156,14 +158,14 @@ export const refreshAccessToken = async (
   try {
     const { refreshToken } = req.cookies;
     if (!refreshToken) {
-      return next(new UnauthorizedError("Токен не передан"));
+      return next(new UnauthorizedError('Токен не передан'));
     }
 
     const { user } = await getUserByRefreshToken(refreshToken);
 
     const tokenExists = user.tokens.some((t) => t.token === refreshToken);
     if (!tokenExists) {
-      throw new UnauthorizedError("Токен недействителен или истёк");
+      throw new UnauthorizedError('Токен недействителен или истёк');
     }
 
     const { accessToken, refreshToken: newRefreshToken } = generateTokens(
@@ -174,7 +176,7 @@ export const refreshAccessToken = async (
     if (user.tokens.length > 10) user.tokens = user.tokens.slice(-10);
     await user.save();
 
-    res.cookie("refreshToken", newRefreshToken, REFRESH_COOKIE_OPTIONS);
+    res.cookie('refreshToken', newRefreshToken, REFRESH_COOKIE_OPTIONS);
     return res.send({
       user: { email: user.email, name: user.name },
       success: true,
@@ -184,7 +186,6 @@ export const refreshAccessToken = async (
     return next(error);
   }
 };
-
 // Получение данных текущего пользователя
 export const currentUser = async (
   req: Request,
@@ -194,12 +195,12 @@ export const currentUser = async (
   try {
     const userId = req.user?._id;
     if (!userId) {
-      return next(new UnauthorizedError("Пользователь не авторизован"));
+      return next(new UnauthorizedError('Пользователь не авторизован'));
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      return next(new NotFoundError("Пользователь не найден"));
+      return next(new NotFoundError('Пользователь не найден'));
     }
 
     return res.send({

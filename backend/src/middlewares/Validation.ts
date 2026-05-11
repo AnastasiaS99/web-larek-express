@@ -1,8 +1,7 @@
-import { celebrate, Joi, Segments } from "celebrate";
+import { celebrate, Joi, Segments } from 'celebrate';
 
 // Общие схемы для повторяющихся типов (email, id, phone, password, address)
-const commonStringSchema = (min = 2, max = 30) =>
-  Joi.string().min(min).max(max).trim();
+const commonStringSchema = (min = 2, max = 30) => Joi.string().min(min).max(max).trim();
 
 const emailSchema = Joi.string().email().trim().required();
 const passwordSchema = Joi.string().min(6).required();
@@ -10,11 +9,14 @@ const idSchema = Joi.string().hex().length(24);
 const phoneSchema = Joi.string()
   .pattern(/^\+?\d{10,15}$/)
   .required();
-const addressSchema = Joi.string().min(5).max(100).trim().required();
+const addressSchema = Joi.string().min(5).max(100).trim()
+  .required();
 
 const fileSchema = Joi.object({
-  fileName: Joi.string().required(),
-  originalName: Joi.string().required(),
+  fileName: Joi.string()
+    .required(),
+  originalName: Joi.string()
+    .required(),
 });
 
 // =================== Валидации ===================
@@ -68,12 +70,13 @@ export const ProductUpdateValidation = celebrate({
 // Валидация заказа
 export const OrderValidation = celebrate({
   [Segments.BODY]: Joi.object({
-    payment: Joi.string().valid("card", "online", "cash").required(),
+    payment: Joi.string().valid('card', 'online', 'cash').required(),
     email: emailSchema,
     phone: phoneSchema,
     address: addressSchema,
     total: Joi.number().min(0).required(),
-    items: Joi.array().items(idSchema).min(1).unique().required(),
+    items: Joi.array().items(idSchema).min(1).unique()
+      .required(),
   }),
 });
 
