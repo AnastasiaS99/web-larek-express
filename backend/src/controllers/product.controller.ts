@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { Error as MongooseError } from 'mongoose';
 import path from 'path';
-import fs from 'fs/promises';  // Promise-based API
+import fs from 'fs/promises';
 import Product from '../models/product';
-import BadRequestError from '../errors/bad-request-error';
-import ConflictError from '../errors/conflict-error';
-import NotFoundError from '../errors/not-found-error';
+import { BadRequestError } from '../errors/bad-request-error';
+import { ConflictError } from '../errors/conflict-error';
+import { NotFoundError } from '../errors/not-found-error';
 import { UPLOAD_PATH, UPLOAD_PATH_TEMP } from '../config';
 
 // Помещение файла из временной папки
@@ -88,7 +88,8 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
       updates.image = image; // предполагается, что image содержит fileName и нужные данные
     }
 
-    const product = await Product.findByIdAndUpdate(productId, updates, { new: true, runValidators: true });
+    const product = await Product.findByIdAndUpdate(productId, updates, 
+      { new: true, runValidators: true });
     if (!product) {
       return next(new NotFoundError('Товар не найден'));
     }
