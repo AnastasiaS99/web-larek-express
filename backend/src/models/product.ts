@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from "mongoose";
 
 // Интерфейс картинки
 export interface IImage {
@@ -16,8 +16,14 @@ export interface IProduct extends Document {
 }
 
 // Константы для категорий
-const categories = ['софт-скил', 'хард-скил', 'кнопка', 'дополнительное', 'другое'] as const;
-type CategoryType = typeof categories[number];
+const categories = [
+  "софт-скил",
+  "хард-скил",
+  "кнопка",
+  "дополнительное",
+  "другое",
+] as const;
+type CategoryType = (typeof categories)[number];
 
 const imageSchema = new Schema<IImage>({
   fileName: {
@@ -30,40 +36,43 @@ const imageSchema = new Schema<IImage>({
   },
 });
 
-const productSchema = new Schema<IProduct>({
-  title: {
-    type: String,
-    required: [true, 'Поле "title" должно быть заполнено'],
-    unique: true,
-    minlength: [2, 'Минимальная длина поля "title" - 2'],
-    maxlength: [30, 'Максимальная длина поля "title" - 30'],
-  },
-  image: {
-    type: imageSchema,
-    required: [true, 'Поле "image" обязательно для заполнения'],
-  },
-  category: {
-    type: String,
-    required: [true, 'Поле "category" обязательно для заполнения'],
-    enum: {
-      values: categories,
-      message: 'Недопустимая категория',
+const productSchema = new Schema<IProduct>(
+  {
+    title: {
+      type: String,
+      required: [true, 'Поле "title" должно быть заполнено'],
+      unique: true,
+      minlength: [2, 'Минимальная длина поля "title" - 2'],
+      maxlength: [30, 'Максимальная длина поля "title" - 30'],
+    },
+    image: {
+      type: imageSchema,
+      required: [true, 'Поле "image" обязательно для заполнения'],
+    },
+    category: {
+      type: String,
+      required: [true, 'Поле "category" обязательно для заполнения'],
+      enum: {
+        values: categories,
+        message: "Недопустимая категория",
+      },
+    },
+    description: {
+      type: String,
+      maxlength: [1000, "Максимальная длина описания - 1000 символов"],
+    },
+    price: {
+      type: Number,
+      default: null,
+      min: [0, "Цена не может быть <0"],
     },
   },
-  description: {
-    type: String,
-    maxlength: [1000, 'Максимальная длина описания - 1000 символов'],
+  {
+    versionKey: false,
+    timestamps: true,
   },
-  price: {
-    type: Number,
-    default: null,
-    min: [0, 'Цена не может быть <0'],
-  },
-}, {
-  versionKey: false,
-  timestamps: true,
-});
+);
 
-const ProductModel = mongoose.model<IProduct>('product', productSchema);
+const ProductModel = mongoose.model<IProduct>("product", productSchema);
 
 export default ProductModel;

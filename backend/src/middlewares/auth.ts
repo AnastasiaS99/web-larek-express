@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt, { JwtPayload } from 'jsonwebtoken';
-import UnauthorizedError from '../errors/unauthorized-error';
-import { AUTH_ACCESS_TOKEN_SECRET } from '../config';
+import { Request, Response, NextFunction } from "express";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import UnauthorizedError from "../errors/unauthorized-error";
+import { AUTH_ACCESS_TOKEN_SECRET } from "../config";
 
 // Расширенный интерфейс Express.Request
 declare global {
@@ -17,20 +17,21 @@ const authMiddleware = (req: Request, _res: Response, next: NextFunction) => {
   // Достаём заголовок authorization из запроса
   const { authorization } = req.headers;
 
-  if (!authorization || !authorization.startsWith('Bearer ')) {
-    return next(new UnauthorizedError('Необходима авторизация (токен отсутствует)'));
+  if (!authorization || !authorization.startsWith("Bearer ")) {
+    return next(
+      new UnauthorizedError("Необходима авторизация (токен отсутствует)"),
+    );
   }
 
   // Получение токена
   const token = authorization.slice(7).trim();
 
   try {
-
     const payload = jwt.verify(token, AUTH_ACCESS_TOKEN_SECRET) as JwtPayload;
 
     // Проверка на существование _id
-    if (!payload._id || typeof payload._id !== 'string') {
-      return next(new UnauthorizedError('Некорректный токен'));
+    if (!payload._id || typeof payload._id !== "string") {
+      return next(new UnauthorizedError("Некорректный токен"));
     }
 
     // Сохранение _id в запросе
@@ -39,14 +40,14 @@ const authMiddleware = (req: Request, _res: Response, next: NextFunction) => {
   } catch (err) {
     // Если токен истёк
     if (err instanceof jwt.TokenExpiredError) {
-      return next(new UnauthorizedError('Токен истёк'));
+      return next(new UnauthorizedError("Токен истёк"));
     }
     // Если токен некорректный
     if (err instanceof jwt.JsonWebTokenError) {
-      return next(new UnauthorizedError('Некорректный токен'));
+      return next(new UnauthorizedError("Некорректный токен"));
     }
     // В случае остальных ошибок
-    return next(new UnauthorizedError('Необходима авторизация'));
+    return next(new UnauthorizedError("Необходима авторизация"));
   }
 };
 

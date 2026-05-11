@@ -4,7 +4,7 @@ export class UnauthorizedError extends Error {
   public statusCode: number;
 
   // Конструктор класса, принимает сообщение об ошибке (по умолчанию 'Unauthorized')
-  constructor(message = 'Unauthorized') {
+  constructor(message = "Unauthorized") {
     // Вызываем конструктор родительского класса Error с сообщением
     super(message);
     // Устанавливаем статус-код HTTP в 401
