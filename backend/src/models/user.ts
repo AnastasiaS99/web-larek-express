@@ -13,7 +13,7 @@ export interface IUser extends Document {
   tokens: IUserToken[];
 }
 
-// схема для токена пользователя
+// Схема для токена пользователя
 const userTokenSchema = new Schema<IUserToken>(
   {
     token: {
@@ -24,7 +24,7 @@ const userTokenSchema = new Schema<IUserToken>(
   { _id: false }
 );
 
-// основная схема пользователя
+// Основная схема пользователя
 const userSchema = new Schema<IUser>(
   {
     name: {
@@ -42,20 +42,20 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: [true, 'Поле "password" должно быть заполнено'],
       minlength: [6, 'Минимальная длина поля "password" - 6'],
-      select: false, // по умолчанию скрывать
+      select: false,
     },
     tokens: {
       type: [userTokenSchema],
       default: [],
-      select: false, // по умолчанию скрывать
+      select: false,
     },
   },
   {
     versionKey: false,
-    timestamps: true, // добавляем для автоматического учета дат
+    timestamps: true,
   }
 );
 
-// экспорт модели с правильным именованием
+// Экспорт модели
 const UserModel = mongoose.model<IUser>('User', userSchema);
 export default UserModel;

@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { UPLOAD_PATH } from '../config';
 import BadRequestError from '../errors/bad-request-error';
 
-// Расширяем интерфейс Request для поддержки req.file (например, если используешь multer)
+// Расширяем интерфейса Request
 declare module 'express' {
   interface Request {
     file?: {
@@ -16,11 +16,11 @@ declare module 'express' {
 const uploadFile = (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.file) {
-      // Явно прерываем выполнение при ошибке
+      // В случае ошибки
       return next(new BadRequestError('Файл обязателен для загрузки.'));
     }
 
-    // Формируем относительный путь для клиента
+    // Относительный путь для клиента
     const relativePath = path.posix.join('/', UPLOAD_PATH, req.file.filename);
 
     res.status(201).json({

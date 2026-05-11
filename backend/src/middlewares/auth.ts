@@ -3,6 +3,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import UnauthorizedError from '../errors/unauthorized-error';
 import { AUTH_ACCESS_TOKEN_SECRET } from '../config';
 
+// Расширенный интерфейс Express.Request
 declare global {
   namespace Express {
     interface Request {
@@ -11,37 +12,43 @@ declare global {
   }
 }
 
+// Проверка авторизации по JWT-токену
 const authMiddleware = (req: Request, _res: Response, next: NextFunction) => {
+  // Достаём заголовок authorization из запроса
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
     return next(new UnauthorizedError('Необходима авторизация (токен отсутствует)'));
   }
 
+  // Получение токена
   const token = authorization.slice(7).trim();
 
   try {
-    // verify возвращает JwtPayload или выбрасывает ошибку
+
     const payload = jwt.verify(token, AUTH_ACCESS_TOKEN_SECRET) as JwtPayload;
 
-    // Проверка наличия _id в payload
+    // Проверка на существование _id
     if (!payload._id || typeof payload._id !== 'string') {
       return next(new UnauthorizedError('Некорректный токен'));
     }
 
+    // Сохранение _id в запросе
     req.user = { _id: payload._id };
-    return next();
+    return next(); // авторизация успешна, идём дальше
   } catch (err) {
-    // Обработка ошибок JWT
+    // Если токен истёк
     if (err instanceof jwt.TokenExpiredError) {
       return next(new UnauthorizedError('Токен истёк'));
     }
+    // Если токен некорректный
     if (err instanceof jwt.JsonWebTokenError) {
       return next(new UnauthorizedError('Некорректный токен'));
     }
-    // Другие ошибки
+    // В случае остальных ошибок
     return next(new UnauthorizedError('Необходима авторизация'));
   }
 };
 
+// Экспорт класса
 export default authMiddleware;

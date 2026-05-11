@@ -1,10 +1,12 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+// Интерфейс картинки
 export interface IImage {
   fileName: string;
   originalName: string;
 }
 
+//Интерфейс продукта
 export interface IProduct extends Document {
   title: string;
   image: IImage;
@@ -59,7 +61,7 @@ const productSchema = new Schema<IProduct>({
   },
 }, {
   versionKey: false,
-  timestamps: true, // добавлено для автоматического учета времени
+  timestamps: true,
 });
 
 const ProductModel = mongoose.model<IProduct>('product', productSchema);

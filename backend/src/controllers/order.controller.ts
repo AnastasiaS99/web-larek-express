@@ -3,13 +3,14 @@ import { faker } from '@faker-js/faker';
 import Product from '../models/product';
 import BadRequestError from '../errors/bad-request-error';
 
+// Интерфейс заказа
 type CreateOrderInfo = {
   payment: 'card' | 'online' | 'cash';
   email: string;
   phone: string;
   address: string;
-  total: number | string;  // допускается, поскольку вы делаете проверку
-  items: string[];         // список ID товаров
+  total: number | string;  
+  items: string[];         
 };
 
 const createOrder: RequestHandler = async (req, res, next) => {
@@ -17,29 +18,29 @@ const createOrder: RequestHandler = async (req, res, next) => {
     const body = req.body as CreateOrderInfo;
     const { items } = body;
 
-    // Обработка total: допускается строка, превращаем в число
+    // Обработка total
     const totalNum = typeof body.total === 'string' ? Number(body.total) : body.total;
 
     if (!Number.isFinite(totalNum)) {
       throw new BadRequestError('Неверное значение общей суммы');
     }
 
-    // Убираем возможные дубли
+    // Работа с ненужными дулями
     const uniqueItemIds = Array.from(new Set(items));
 
-    // Получаем товары из базы
+    // Получение товаров из базы
     const products = await Product.find({ _id: { $in: uniqueItemIds } }).lean();
 
     if (products.length !== uniqueItemIds.length) {
       throw new BadRequestError('Некоторые товары не найдены');
     }
 
-    // Создаем карту цен
+    // Создание карты цен
     const priceById = new Map(
       products.map((p) => [p._id.toString(), p.price]),
     );
 
-    // Суммируем цены товаров, проверяем наличие каждого ID
+    // Сумма цены товаров (каждый товар по ID)
     const calculatedSum = items.reduce((acc, id) => {
       const price = priceById.get(id);
       if (price === undefined) {
@@ -51,12 +52,12 @@ const createOrder: RequestHandler = async (req, res, next) => {
       return acc + price;
     }, 0);
 
-    // Проверяем сумму
+    // Проверка суммы
     if (calculatedSum !== totalNum) {
       throw new BadRequestError('Сумма не совпадает с общей суммой товаров');
     }
 
-    // Создаем заказ (или просто возвращаем подтверждение)
+    // Создание заказа
     res.status(200).send({
       id: faker.string.uuid(),
       total: totalNum,

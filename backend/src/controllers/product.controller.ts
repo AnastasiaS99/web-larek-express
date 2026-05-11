@@ -8,18 +8,18 @@ import ConflictError from '../errors/conflict-error';
 import NotFoundError from '../errors/not-found-error';
 import { UPLOAD_PATH, UPLOAD_PATH_TEMP } from '../config';
 
-// Асинхронная функция перемещения файла из временной папки в финальную
+// Помещение файла из временной папки
 const moveFromTemp = async (fileName: string) => {
   const filename = path.basename(fileName);
   const tempPath = path.join(__dirname, '../public', UPLOAD_PATH_TEMP, filename);
   const finalPath = path.join(__dirname, '../public', UPLOAD_PATH, filename);
 
   try {
-    // Проверка существует ли файл, и перемещаем
+    // Проверка существование файла и перемещение
     await fs.access(tempPath);
     await fs.rename(tempPath, finalPath);
   } catch (err) {
-    // Можно логировать ошибку если нужно
+    // В случае ошибки
     console.error(`Ошибка перемещения файла: ${err}`);
     throw new BadRequestError('Файл не найден или его перемещение невозможно');
   }

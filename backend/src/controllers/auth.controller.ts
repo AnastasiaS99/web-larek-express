@@ -30,13 +30,13 @@ const REFRESH_COOKIE_OPTIONS: CookieOptions = {
   path: '/',
 };
 
-// Создает новые access и refresh токены
+// Создаем новые access и refresh токены
 const generateTokens = (_id: string) => ({
   accessToken: jwt.sign({ _id }, ACCESS_SECRET, { expiresIn: ACCESS_EXPIRY }),
   refreshToken: jwt.sign({ _id }, REFRESH_SECRET, { expiresIn: REFRESH_EXPIRY }),
 });
 
-// Вытаскивает пользователя по refresh токену,throws ошибку при необходимости
+// Получение нового пользователя через refresh токен, ошибка в случае проблемы
 const getUserByRefreshToken = async (refreshToken: string) => {
   try {
     const payload = jwt.verify(refreshToken, REFRESH_SECRET) as { _id: string };
@@ -164,7 +164,7 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
   }
 };
 
-// Получить текущего пользователя
+// Получение данных текущего пользователя
 export const currentUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user?._id;
